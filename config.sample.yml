@@ -1,0 +1,8 @@
+cloudflare:
+  api_token: "tu_token_api_de_cloudflare"
+email: tu_email@ejemplo.com
+output_dir: "./tmp"
+dest_path: "/ruta/para/guardar/certificados"
+domains:
+  - "ejemplo.com"
+  - "otro-dominio.com"  

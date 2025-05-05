@@ -1,0 +1,8 @@
+build 
+dist 
+*.spec
+*.log
+*.log.*
+*.log.*.*
+*.log.*.*.*
+*.log.*.*.*.*
