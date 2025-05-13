@@ -19,7 +19,8 @@ all: clean requirements build
 requirements:
 	@echo "$(GREEN)Instalando dependencias...$(NC)"
 	$(PIP) install -r requirements.txt
-	$(PIP) install pyinstaller
+	$(PIP) install pyinstaller 
+	sudo pip3 install --upgrade acme certbot certbot-dns-cloudflare
 
 # Construir el ejecutable
 build:

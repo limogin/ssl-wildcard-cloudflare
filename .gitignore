@@ -6,3 +6,5 @@ dist
 *.log.*.*
 *.log.*.*.*
 *.log.*.*.*.*
+config.yml
+tmp 
