@@ -1,4 +1,4 @@
-# Generador de Certificados SSL Let's Encrypt con Cloudflare
+# Generador de Certificados SSL Wildcard con Let's Encrypt y Cloudflare
 
 > **⚠️ AVISO IMPORTANTE**: Esta funcionalidad se encuentra todavía en versión alpha y no es estable para uso en producción. Se recomienda utilizar solo en entornos de prueba hasta que se publique una versión estable.
 
@@ -25,154 +25,168 @@ Este script simplifica todo el proceso utilizando la API de Cloudflare para:
 - Mantener copias de seguridad
 - Monitorizar fechas de expiración
 
-## Instalación de los requerimientos 
-
-```bash
-sudo apt-get update
-sudo apt-get install certbot
-pip install certbot-dns-cloudflare
+```mermaid
+graph TD
+    A[Inicio] --> B[Configuración]
+    B --> C[Crear Token API Cloudflare]
+    B --> D[Generar config.yml]
+    B --> E[Editar config.yml]
+    
+    C --> F[Instalación]
+    D --> F
+    E --> F
+    
+    F --> G[Instalar Certbot]
+    F --> H[Instalar Plugin Cloudflare]
+    
+    G --> I[Operaciones]
+    H --> I
+    
+    I --> J[Generar Certificados]
+    I --> K[Renovar Certificados]
+    I --> L[Copiar Certificados]
+    
+    J --> M[Verificar Dominios]
+    M --> N[Crear Respaldo]
+    N --> O[Generar Certificados]
+    O --> P[Eliminar Credenciales]
+    
+    K --> Q[Verificar Expiración]
+    Q --> R[Crear Respaldo]
+    R --> S[Renovar Certificados]
+    S --> T[Eliminar Credenciales]
+    
+    L --> U[Copiar a Destino]
+    
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#bbf,stroke:#333,stroke-width:2px
+    style F fill:#bbf,stroke:#333,stroke-width:2px
+    style I fill:#bbf,stroke:#333,stroke-width:2px
+    style P fill:#bfb,stroke:#333,stroke-width:2px
+    style T fill:#bfb,stroke:#333,stroke-width:2px
+    style U fill:#bfb,stroke:#333,stroke-width:2px
 ```
 
-## Configuración de Cloudflare
+## Requisitos
 
-1. Crear un token de API de Cloudflare:
-   - Inicia sesión en tu [panel de Cloudflare](https://dash.cloudflare.com/)
-   - Ve a "Mi Perfil" > "Tokens de API" > "Crear Token"
-   - Selecciona "Plantilla de permisos específicos"
-   - Agrega permisos "Zona:DNS:Edit"
-   - Limita el acceso a las zonas específicas donde necesites los certificados
-   - Crea el token y guárdalo de forma segura
+- Python 3.6 o superior
+- Certbot instalado
+- Plugin certbot-dns-cloudflare instalado
+- Token de API de Cloudflare con permisos de Zona:DNS:Edit
 
-2. Crear archivo de configuración `config.yml`:
+## Instalación
+
+1. Instalar certbot y el plugin de Cloudflare:
+```bash
+sudo apt-get install certbot python3-certbot-dns-cloudflare
+```
+
+2. Clonar este repositorio:
+```bash
+git clone https://github.com/tu-usuario/ssl-letsencrypt-cloudflare.git
+cd ssl-letsencrypt-cloudflare
+```
+
+## Configuración
+
+1. Crear un token de API en Cloudflare:
+   - Ve a https://dash.cloudflare.com/profile/api-tokens
+   - Crea un nuevo token con permisos de Zona:DNS:Edit
+   - Copia el token generado
+
+2. Generar archivo de configuración:
+```bash
+python3 ssl-wildcard-cloudflare.py --init
+```
+
+3. Editar el archivo `config.yml` generado:
 ```yaml
 cloudflare:
   api_token: tu_token_api_cloudflare
 email: tu_email@ejemplo.com
 domains:
-  - ejemplo1.com
-  - ejemplo2.com
+  - example.com
+  - otro-dominio.com
 dest_path: /ruta/para/certificados
-output_dir: /ruta/de/salida
+output_dir: /ruta/salida
 ```
 
-## Ejecución individual de certbot con la API de Cloudflare 
+## Uso
+
+El script puede ejecutarse con los siguientes parámetros:
 
 ```bash
-certbot certonly \
-  --authenticator dns-cloudflare \
-  --dns-cloudflare-credentials cloudflare.ini \
-  --dns-cloudflare-propagation-seconds 60 \
-  -d example.com \
-  -d *.example.com
-```  
+# Generar archivo de configuración
+python3 ssl-wildcard-cloudflare.py --init
 
-## Referencias 
+# Instalar certbot y plugin
+python3 ssl-wildcard-cloudflare.py --install
 
-- [Documentación oficial del plugin certbot-dns-cloudflare](https://certbot-dns-cloudflare.readthedocs.io/)
-- [API de Cloudflare](https://developers.cloudflare.com/api/)
-- [Creación de tokens de API en Cloudflare](https://developers.cloudflare.com/api/tokens/create/)
+# Generar certificados
+python3 ssl-wildcard-cloudflare.py --generate
 
-## Uso del Script ssl-wildcard-cloudflare.py
+# Copiar certificados
+python3 ssl-wildcard-cloudflare.py --copy
 
-### Requisitos previos
-```bash
-sudo apt update
-sudo apt install python3 python3-pip
+# Renovar certificados
+python3 ssl-wildcard-cloudflare.py --renew
+
+# Mostrar información detallada de la ejecución
+python3 ssl-wildcard-cloudflare.py --generate --verbose
 ```
 
-### Instalación
+### Parámetros disponibles
 
-1. Clonar el repositorio:
-```bash
-git clone <url-repositorio>
-cd <directorio-repositorio>
-```
-
-2. Instalar dependencias:
-```bash
-pip install requests pyyaml certbot-dns-cloudflare
-```
-
-### Opciones del script
-
-```bash
-python ssl-wildcard-cloudflare.py --help
-```
-
-Muestra las siguientes opciones:
-- `--init`: Genera un archivo config.yml de ejemplo
+- `--config`: Ruta al archivo de configuración YAML (por defecto: config.yml)
 - `--install`: Instala certbot y el plugin de Cloudflare
 - `--generate`: Genera los certificados
 - `--copy`: Copia los certificados a la ruta de destino
-- `--renew`: Renueva los certificados próximos a expirar
-- `--config`: Especifica ruta al archivo de configuración YAML
+- `--renew`: Renueva los certificados
+- `--init`: Genera un archivo config.yml de ejemplo
+- `--verbose`: Muestra información detallada de la ejecución
 
-### Configuración
+## Características
 
-El script requiere un archivo `config.yml` con la siguiente estructura:
-```yaml
-cloudflare:
-  api_token: tu_token_api_cloudflare
-email: tu_email@ejemplo.com
-domains:
-  - ejemplo1.com
-  - ejemplo2.com
-dest_path: /ruta/para/certificados
-output_dir: /ruta/de/salida
-```
+- Generación de certificados wildcard (*.dominio.com)
+- Autenticación DNS automática a través de Cloudflare
+- Respaldo automático de certificados existentes
+- Renovación automática de certificados próximos a expirar
+- Eliminación segura de credenciales temporales
+- Modo verbose para depuración
 
-### Uso del script
+## Seguridad
 
-1. Crear un archivo de configuración de ejemplo:
-```bash
-python ssl-wildcard-cloudflare.py --init
-```
+- El token de API de Cloudflare se almacena de forma segura en el archivo de configuración
+- Los archivos temporales con credenciales se eliminan automáticamente después de su uso
+- Los certificados se respaldan antes de cualquier operación de modificación
 
-2. Instalar certbot y el plugin de Cloudflare:
-```bash
-python ssl-wildcard-cloudflare.py --install
-```
+## Notas
 
-3. Generar nuevos certificados:
-```bash
-python ssl-wildcard-cloudflare.py --generate
-```
+- Los certificados se generan en `/etc/letsencrypt/live/`
+- Se crean enlaces simbólicos a los certificados más recientes
+- Los respaldos se almacenan en `{dest_path}/backups/YYYYMMDD_HHMMSS/`
+- Los certificados copiados se guardan en la ruta especificada en `dest_path`
 
-4. Renovar certificados existentes:
-```bash
-python ssl-wildcard-cloudflare.py --renew
-```
+## Solución de problemas
 
-5. Usar un archivo de configuración específico:
-```bash
-python ssl-wildcard-cloudflare.py --config /ruta/a/config.yml --generate
-```
+Si encuentras algún error:
 
-6. Copiar certificados a la ruta de destino:
-```bash
-python ssl-wildcard-cloudflare.py --copy
-```
+1. Verifica que el token de API de Cloudflare tenga los permisos correctos
+2. Asegúrate de que los dominios estén correctamente configurados en Cloudflare
+3. Ejecuta el script con `--verbose` para ver información detallada
+4. Verifica los logs del sistema para más detalles
 
-### Sistema de Respaldo
+## Contribuir
 
-El script incluye un sistema automático de respaldo que:
-- Crea copias de seguridad antes de renovar o generar certificados
-- Almacena los respaldos en `dest_path/backups/` con marca de tiempo
-- Mantiene los permisos originales de los archivos
+Las contribuciones son bienvenidas. Por favor, sigue estos pasos:
 
-Estructura de directorios de respaldo:
-```
-/ruta/certificados/
-    ├── backups/
-    │   ├── 20240315_143022/
-    │   │   ├── ejemplo1.com.cert.pem
-    │   │   ├── ejemplo1.com.chain.pem
-    │   │   ├── ejemplo1.com.fullchain.pem
-    │   │   └── ejemplo1.com.key
-    │   └── ...
-    ├── ejemplo1.com.cert.pem
-    ├── ejemplo1.com.chain.pem
-    ├── ejemplo1.com.fullchain.pem
-    └── ejemplo1.com.key
-```
+1. Haz fork del repositorio
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## Licencia
+
+Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
 
