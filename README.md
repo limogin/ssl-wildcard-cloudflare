@@ -56,15 +56,8 @@ graph TD
     R --> S[Renovar Certificados]
     S --> T[Eliminar Credenciales]
     
-    L --> U[Copiar a Destino]
+    L --> U[Copiar a Destino]   
     
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style F fill:#bbf,stroke:#333,stroke-width:2px
-    style I fill:#bbf,stroke:#333,stroke-width:2px
-    style P fill:#bfb,stroke:#333,stroke-width:2px
-    style T fill:#bfb,stroke:#333,stroke-width:2px
-    style U fill:#bfb,stroke:#333,stroke-width:2px
 ```
 
 ## Requisitos
